@@ -7,23 +7,91 @@
  */
 
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View} from 'react-native';
+import {Button, Date, StyleSheet, Text, View} from 'react-native';
+import Moment from 'react-moment';
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
-  android:
-    'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
+class TimerView extends Component {
+  constructor(props) {
+    super(props)
+    console.log('Constructor')
+  }
 
-type Props = {};
-export default class App extends Component<Props> {
+  // Mounting
+  componentWillMount() {
+    console.log('componentWillMount')
+  }
+
   render() {
+    console.log('render')
+
+    return (
+      <View>
+        <Text> {this.props.currentTime} </Text>
+      </View>
+    )
+  }
+
+  componentDidMount() {
+    console.log('componentDidMount')
+  }
+
+  // Updating
+  componentWillReceiveProps(nextProps) {
+    console.log('componentWillReceiveProps nextProps: ', nextProps)
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    console.log('shouldComponentUpdate with nextProps, nextState', nextProps, nextState)
+    return true
+  }
+
+  componentWillUpdate(nextProps, nextState) {
+    console.log('componentWillUpdate with nextProps, nextState', nextProps, nextState)
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    console.log('componentDidUpdate with prevProps, prevState', prevProps, prevState)
+  }
+
+  // Unmount
+  componentWillUnmount() {
+    console.log('ComponentWillUnmount')
+  }
+}
+
+export default class App extends Component {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isRemoved: false,
+      currentTime: 123456789
+    }
+
+    // setTimeInterval( () => {
+    //   this.setState({
+    //     currentTime: this.state.currentTime + 1
+    //   })
+    // }, 1000)
+
+  }
+
+  onToogleShowing = () => {
+    this.setState({
+      isRemoved: !this.state.isRemoved
+    })
+  }
+
+  render() {
+
+    const timerView = (!this.state.isRemoved) ? <TimerView currentTime={this.state.currentTime} /> : null
+    const btnTitle = (!this.state.isRemoved) ? 'Remove' : 'Show'
+
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>Welcome to React Native!</Text>
-        <Text style={styles.instructions}>To get started, edit App.js</Text>
-        <Text style={styles.instructions}>{instructions}</Text>
+        {timerView}
+        <Button onPress={this.onToogleShowing} title={btnTitle} />        
       </View>
     );
   }
@@ -35,15 +103,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
+  }
 });
