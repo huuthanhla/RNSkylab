@@ -30,6 +30,10 @@ build/
 local.properties
 *.iml
 
+# Pod
+#
+Pods
+
 # node.js
 #
 node_modules/
