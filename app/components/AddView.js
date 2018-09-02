@@ -10,7 +10,7 @@ import {
   View
 } from 'react-native';
 
-import {connect} from 'react-redux'
+import { connect } from 'react-redux';
 
 class AddView extends Component {
 
@@ -21,7 +21,7 @@ class AddView extends Component {
 
   render() {
 
-    const onAddNewTask = this.props.onAddNewTask
+    const onAddNewTask = this.props.onAddNewTask;
 
     return (
       <View style={ styles.addView } >
@@ -32,14 +32,14 @@ class AddView extends Component {
               returnKeyType="done"
               underlineColorAndroid="transparent"
               value={`${this.state.newTaskName}`}
-              onSubmitEditing={ () => onAddNewTask(this.state.newTaskName) }
+              onSubmitEditing={ () => onAddNewTask( this.state.newTaskName ) }
               onChangeText={ text => this.setState({ newTaskName: text }) }
               placeholder="Task name" 
               style={[{ flex: 1 }, styles.input ]} 
             />
           </View>
 
-          <TouchableOpacity style={ styles.button } onPress={ () => onAddNewTask(this.state.newTaskName) }>
+          <TouchableOpacity style={ styles.button } onPress={ () => onAddNewTask( this.state.newTaskName ) }>
             <Text style={{ color: 'white' }}>Add</Text>
           </TouchableOpacity>
         </View>
@@ -100,13 +100,13 @@ const addTask = (name) => {
 export default connect( 
   state => {
     return {
-
+      
     }
   },
   dispatch => {
     return {
-      onAddNewTask: (name) => dispatch(addTask(name)),
-      
+      onAddNewTask: (name) => dispatch( addTask(name))
     }
   }
+
 )(AddView);
