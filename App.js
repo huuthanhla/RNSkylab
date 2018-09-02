@@ -14,10 +14,14 @@ import {
   View
 } from 'react-native';
 
-import {createStore} from 'redux'
+import {
+  createStore, 
+  combineReducers,
+  applyMiddleware
+} from 'redux'
 
 // State
-let appState = { number: 1, histories: [1] }
+let appState = { number: 1, histories: [1], errorMsg: '' }
 
 // Action
 const add = {
@@ -31,7 +35,7 @@ const sub = {
 }
 
 // Reducer
-const numberReducer = (state, action) => {
+const numberReducer = (state = appState, action) => {
   switch (action.type) {
     case 'ADD':
       // Mutable state
@@ -60,29 +64,59 @@ const numberReducer = (state, action) => {
   return state
 }
 
-// Store
-const store = createStore(numberReducer, appState)
-
-// Test
-store.subscribe( () => {
-  console.log('State updated', store.getState())
-})
-store.dispatch(add)
-store.dispatch(add)
-store.dispatch(add)
-store.dispatch(sub)
-
-store.dispatch({
-  type: 'ADD',
-  value: 5
-})
-
-const createAddAction = (number) => {
-  return {type: 'ADD', value: number}
+const errorReducer = (state = appState, action) => {
+  switch(action.type) {
+    case 'LESS_THAN_ZERO':
+      state = {
+        ...state,
+        errorMsg: "Number can be not be less than zero"
+      }
+  }
+  return state
 }
 
-store.dispatch( createAddAction(100) )
+// Middleware
+const logger = store => next => action => {
+  console.log('State', store.getState())
 
+  // Chuyển hướng action ở đây
+  next(action)
+
+  console.log('State updated', store.getState())
+}
+
+const checkIsZero = store => next => action => {
+  const currentNumber = store.getState().number.number
+  if (currentNumber == 0) {
+    next({ type: 'LESS_THAN_ZERO' })
+  } else {
+    next(action)
+  }
+
+  console.log('Current number: ', currentNumber)
+}
+
+// Store
+const reducers = combineReducers({number: numberReducer, err: errorReducer})
+const store = createStore(reducers, applyMiddleware(logger, checkIsZero))
+
+
+// Test
+// store.subscribe( () => {
+//   console.log('State updated', store.getState())
+// })
+store.dispatch(add)
+store.dispatch(sub)
+store.dispatch(sub)
+store.dispatch(sub)
+store.dispatch(sub)
+
+
+
+
+
+
+//====================================================================
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
   android:
