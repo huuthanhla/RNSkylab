@@ -21,126 +21,94 @@ import {
 } from 'redux'
 
 import thunk from 'redux-thunk'
+import { Provider } from 'react-redux'
 
 // State
-let appState = { number: 1, histories: [1], errorMsg: '' }
+let appState = {
+  data : [
+    { title: 'Go to the office', isFinished: true },
+    { title: 'Prepare tasks for today', isFinished: false },
+    { title: 'Team meeting', isFinished: false },
+    { title: 'Commit tasks changed', isFinished: false },
+  ]
+}
 
 // Action
-const add = {
-  type: 'ADD',
-  value: 1
-}
-
-const sub = {
-  type: 'SUB',
-  value: 1
-}
 
 // Reducer
-const numberReducer = (state = appState, action) => {
-  switch (action.type) {
-    case 'ADD':
-      // Mutable state
-      // state.number += action.value
 
-      const addValue = state.number + action.value
-      // Immutable state
-      state = {
-        ...state,
-        histories: [...state.histories, addValue],
-        number: addValue
-      }
-      break
-
-    case 'SUB':
-      // Immutable state
-      const subValue = state.number - action.value
-      state = {
-        ...state,
-        histories: [...state.histories, subValue],
-        number: subValue
-      }
-      break
-  }
-
-  return state
-}
-
-const errorReducer = (state = appState, action) => {
+const taskListReducer = (state = appState, action) => {
+  let newTaskList = state.data
   switch(action.type) {
-    case 'LESS_THAN_ZERO':
-      state = {
-        ...state,
-        errorMsg: "Number can be not be less than zero"
-      }
+    case 'ADD':
+      const newTask = { title: action.taskName, isFinished: false }
+      return {...state, data: [...state.data, newTask]}
+    case 'FINISH':
+      let isFinished = newTaskList[action.atIndex].isFinished
+      newTaskList[action.atIndex].isFinished = !isFinished
+      return {...state, data: newTaskList}
+    case 'DELETE':
+    newTaskList = newTaskList.filter((item, i) => i !== action.atIndex)
+    return {...state, data: newTaskList}
   }
   return state
 }
 
 // Middleware
-const logger = store => next => action => {
-  console.log('State', store.getState())
 
-  // Chuyển hướng action ở đây
-  next(action)
-
-  alert(`State updated ${JSON.stringify(store.getState())}`)
-}
-
-const checkIsZero = store => next => action => {
-  const currentNumber = store.getState().number.number
-  if (currentNumber == 0) {
-    next({ type: 'LESS_THAN_ZERO' })
-  } else {
-    next(action)
-  }
-
-  console.log('Current number: ', currentNumber)
-}
 
 // Store
-const reducers = combineReducers({number: numberReducer, err: errorReducer})
-const store = createStore(reducers, applyMiddleware(thunk, logger, checkIsZero))
+const store = createStore(taskListReducer)
 
 
 // Test
-// store.subscribe( () => {
-//   console.log('State updated', store.getState())
-// })
 
-const addAfter3s = () => {
-  return dispatch => {
-    setTimeout(() => {
-      dispatch(add)
-    }, 3000);
+import AddView from './components/AddView';
+import Counter from './components/Counter';
+import TaskFlatList from './components/TaskFlatList';
+
+export default class Todo extends Component {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      data : [
+        { title: 'Go to the office', isFinished: true },
+        { title: 'Prepare tasks for today', isFinished: false },
+        { title: 'Team meeting', isFinished: false },
+        { title: 'Commit tasks changed', isFinished: false },
+      ]
+    }
   }
-}
 
-// setTimeout(() => {
-//   store.dispatch(add)
-// }, 3000);
-store.dispatch(addAfter3s())
+  onAddNewTask = (taskName) => {
+    const newTask = { title: taskName, isFinished: false }
+    const newTaskList = [ ...this.state.data, newTask ]
 
+    this.setState({ data: newTaskList });
+  }
 
+  // onFinishedItem = (index) => {
+  //   let newTaskList = this.state.data;
+  //   newTaskList[index].isFinished = true; 
+  //   this.setState({ data: newTaskList });
+  // }
 
+  // onDeleteItem = (index) => {
+  //   let newTaskList = this.state.data.filter( (item, i) => i != index );
+  //   this.setState({ data: newTaskList });
+  // }
 
-
-//====================================================================
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
-  android:
-    'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
-
-export default class App extends Component {
   render() {
     return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>Welcome to React Native!</Text>
-        <Text style={styles.instructions}>To get started, edit App.js</Text>
-        <Text style={styles.instructions}>{instructions}</Text>
-      </View>
+      <Provider store={store}>
+        <View style={ styles.container }>
+          <AddView onAddNewTask={ this.onAddNewTask } />
+          <Counter />
+          <TaskFlatList />
+        </View>    
+      </Provider>  
     );
   }
 }
@@ -148,18 +116,6 @@ export default class App extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
+    backgroundColor: '#E1F5FE'
+  }
 });
