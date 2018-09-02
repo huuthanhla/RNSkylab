@@ -20,6 +20,8 @@ import {
   applyMiddleware
 } from 'redux'
 
+import thunk from 'redux-thunk'
+
 // State
 let appState = { number: 1, histories: [1], errorMsg: '' }
 
@@ -82,7 +84,7 @@ const logger = store => next => action => {
   // Chuyển hướng action ở đây
   next(action)
 
-  console.log('State updated', store.getState())
+  alert(`State updated ${JSON.stringify(store.getState())}`)
 }
 
 const checkIsZero = store => next => action => {
@@ -98,19 +100,26 @@ const checkIsZero = store => next => action => {
 
 // Store
 const reducers = combineReducers({number: numberReducer, err: errorReducer})
-const store = createStore(reducers, applyMiddleware(logger, checkIsZero))
+const store = createStore(reducers, applyMiddleware(thunk, logger, checkIsZero))
 
 
 // Test
 // store.subscribe( () => {
 //   console.log('State updated', store.getState())
 // })
-store.dispatch(add)
-store.dispatch(sub)
-store.dispatch(sub)
-store.dispatch(sub)
-store.dispatch(sub)
 
+const addAfter3s = () => {
+  return dispatch => {
+    setTimeout(() => {
+      dispatch(add)
+    }, 3000);
+  }
+}
+
+// setTimeout(() => {
+//   store.dispatch(add)
+// }, 3000);
+store.dispatch(addAfter3s())
 
 
 
